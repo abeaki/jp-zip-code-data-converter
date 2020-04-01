@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+KEN_ALL.CSV
+KEN_ALL_UTF8.CSV
+ken_all.zip
+myvenv/
+.vscode/
