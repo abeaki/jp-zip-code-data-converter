@@ -65,9 +65,9 @@ def download():
                     town_ext_kana_name = town_kana_name
                 else:
                     town_short_name = re.sub(r"（.*）", "", town_name)
-                    town_ext_name = re.sub(town_short_name, "", town_name)
+                    town_ext_name = town_name.replace(town_short_name, "", 1)
                     town_short_kana_name = re.sub(r"（.*）", "", town_kana_name)
-                    town_ext_kana_name = re.sub(town_short_kana_name, "", town_kana_name)
+                    town_ext_kana_name = town_kana_name.replace(town_short_kana_name, "", 1)
                 
                 if town_ext_name ==  "（次のビルを除く）":
                     exclude_building = True
@@ -110,11 +110,12 @@ def download():
             # xxx = row[14] # 変更理由　（「0」は変更なし、「1」市政・区政・町政・分区・政令指定都市施行、「2」住居表示の実施、「3」区画整理、「4」郵便区調整等、「5」訂正、「6」廃止（廃止データのみ使用））
 
 
-        town_short_name = re.sub(r"（.*）", "", town_name)
-        town_ext_name = re.sub(town_short_name, "", town_name)
         town_kana_name = mojimoji.han_to_zen(town_kana_name)
+
+        town_short_name = re.sub(r"（.*）", "", town_name)
+        town_ext_name = town_name.replace(town_short_name, "", 1)
         town_short_kana_name = re.sub(r"（.*）", "", town_kana_name)
-        town_ext_kana_name = re.sub(town_short_kana_name, "", town_kana_name)
+        town_ext_kana_name = town_kana_name.replace(town_short_kana_name, "", 1)
 
         if exclude_building and town_short_name.startswith(building_prefix):
             building_flag = 1
