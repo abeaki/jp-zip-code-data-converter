@@ -91,7 +91,7 @@ def download():
                 else:
                     zip_code_branch_no[zip_code] = 1
 
-                dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{town_short_name},{town_ext_name},{mojimoji.han_to_zen(city_kana_name)},{town_short_kana_name},{town_ext_kana_name},{town_duplicate_flag},{town_multi_flag},{building_flag}\n")
+                dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{town_short_name},{town_ext_name},{mojimoji.han_to_zen(city_kana_name)},{town_short_kana_name},{town_ext_kana_name},{town_duplicate_flag},{building_flag}\n")
 
             area_code = row[0] # 全国地方公共団体コード
             # xxx = row[1] # 旧郵便番号5桁
@@ -133,7 +133,7 @@ def download():
         else:
             zip_code_branch_no[zip_code] = 1
 
-        dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{town_short_name},{town_ext_name},{mojimoji.han_to_zen(city_kana_name)},{town_short_kana_name},{town_ext_kana_name},{town_duplicate_flag},{town_multi_flag},{building_flag}\n")
+        dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{town_short_name},{town_ext_name},{mojimoji.han_to_zen(city_kana_name)},{town_short_kana_name},{town_ext_kana_name},{town_duplicate_flag},{building_flag}\n")
 
 
 if __name__ == "__main__":
