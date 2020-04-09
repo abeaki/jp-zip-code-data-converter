@@ -131,5 +131,8 @@ dmypy.json
 KEN_ALL.CSV
 KEN_ALL_UTF8.CSV
 ken_all.zip
+KEN_ALL_ROME.CSV
+ken_all_rome.zip
+main_ik.py
 myvenv/
 .vscode/
