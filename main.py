@@ -258,26 +258,38 @@ def download():
                 city_rome_name = rome_dic[key]["city_name"]
                 town_rome_name = rome_dic[key]["town_name"]
             else:
-                key = f"{prefecture_name},{city_name},,"
-                if key in rome_dic:
+                town_name_exclude_aza = re.sub(r"(大)?字", "", town_name)
+                key = f"{prefecture_name},{city_name},{town_name_exclude_aza},"
+                if town_name != town_name_exclude_aza and key in rome_dic:
                     city_rome_name = rome_dic[key]["city_name"]
                     town_rome_name = rome_dic[key]["town_name"]
                 else:
-                    city_rome_name = ""
-                    town_rome_name = ""
+                    key = f"{prefecture_name},{city_name},,"
+                    if key in rome_dic:
+                        city_rome_name = rome_dic[key]["city_name"]
+                        town_rome_name = rome_dic[key]["town_name"]
+                    else:
+                        city_rome_name = ""
+                        town_rome_name = ""
 
             key = f"{prefecture_name},{city_name},{town_name},"
             if key in kana_dic:
                 city_kana_name = kana_dic[key]["city_name"]
                 town_kana_name = kana_dic[key]["town_name"]
             else:
-                key = f"{prefecture_name},{city_name},,"
-                if key in kana_dic:
+                town_name_exclude_aza = re.sub(r"(大)?字", "", town_name)
+                key = f"{prefecture_name},{city_name},{town_name_exclude_aza},"
+                if town_name != town_name_exclude_aza and key in kana_dic:
                     city_kana_name = kana_dic[key]["city_name"]
                     town_kana_name = kana_dic[key]["town_name"]
                 else:
-                    city_kana_name = ""
-                    town_kana_name = ""
+                    key = f"{prefecture_name},{city_name},,"
+                    if key in kana_dic:
+                        city_kana_name = kana_dic[key]["city_name"]
+                        town_kana_name = kana_dic[key]["town_name"]
+                    else:
+                        city_kana_name = ""
+                        town_kana_name = ""
 
             dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{city_kana_name},{city_rome_name},{town_name},{town_kana_name},{town_rome_name},{town_ext_name},{office_name},{office_kana_name},{office_flag},{post_office_box_flag}\n")
 
