@@ -109,7 +109,7 @@ def download():
                     town_duplicate_flag = 1
                     building_prefix = town_short_name
                     building_kana_prefix = town_short_kana_name
-                elif exclude_building and town_short_name.startswith(building_prefix):
+                elif exclude_building and town_short_name.startswith(building_prefix) and town_ext_name != "":
                     building_flag = 1
                     town_duplicate_flag = 1
                     town_ext_name = f"{town_short_name}{town_ext_name}".replace(building_prefix, "", 1)
@@ -161,7 +161,7 @@ def download():
         town_short_kana_name = re.sub(r"（.*）", "", town_kana_name)
         town_ext_kana_name = town_kana_name.replace(town_short_kana_name, "", 1)
 
-        if exclude_building and town_short_name.startswith(building_prefix):
+        if exclude_building and town_short_name.startswith(building_prefix) and town_ext_name != "":
             building_flag = 1
             town_duplicate_flag = 1
             town_ext_name = f"{town_short_name}{town_ext_name}".replace(building_prefix, "", 1)
