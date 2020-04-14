@@ -133,6 +133,9 @@ KEN_ALL_UTF8.CSV
 ken_all.zip
 KEN_ALL_ROME.CSV
 ken_all_rome.zip
+JIGYOSYO.CSV
+JIGYOSYO_UTF8.CSV
+jigyosyo.zip
 main_ik.py
 myvenv/
 .vscode/

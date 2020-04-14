@@ -36,6 +36,7 @@ def download():
             city_rome_name = row[5].replace(" ", "-").lower()
             town_rome_name = re.sub(r'^(.*?)(\(.*)?$', r'\1', row[6]).replace(" ", "").replace("IKANIKEISAIGANAIBAAI", "").lower()
 
+            rome_dic[f"{prefecture_name},{city_name},,"] = { "prefecture_name": prefecture_rome_name, "city_name": city_rome_name, "town_name": "" }
             rome_dic[f"{prefecture_name},{city_name},{town_name},"] = { "prefecture_name": prefecture_rome_name, "city_name": city_rome_name, "town_name": town_rome_name }
 
 
@@ -58,6 +59,7 @@ def download():
     src_file_path = "./KEN_ALL.CSV"
     dest_file_path = "./KEN_ALL_UTF8.CSV"
 
+    kana_dic = {}
     with codecs.open(src_file_path, "r", encoding="shift-jis") as src, codecs.open(dest_file_path, "w", encoding="utf-8") as dest:
         reader = csv.reader(src)
         area_code = ""
@@ -131,13 +133,15 @@ def download():
                     city_rome_name = ""
                     town_rome_name = ""
 
-                dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{town_short_name},{town_ext_name},{mojimoji.han_to_zen(city_kana_name)},{town_short_kana_name},{town_ext_kana_name},{city_rome_name},{town_rome_name},{town_duplicate_flag},{building_flag}\n")
+                kana_dic[f"{prefecture_name},{city_name},,"] = { "city_name": city_kana_name, "town_name": "" }
+                kana_dic[f"{prefecture_name},{city_name},{town_short_name},"] = { "city_name": city_kana_name, "town_name": town_short_kana_name }
+                dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{city_kana_name},{city_rome_name},{town_short_name},{town_short_kana_name},{town_rome_name},{town_ext_name},{town_ext_kana_name},{town_duplicate_flag},{building_flag}\n")
 
             area_code = row[0] # 全国地方公共団体コード
             # xxx = row[1] # 旧郵便番号5桁
             zip_code = re.sub(r'([0-9]{3})([0-9]{4})', r'\1-\2', row[2]) # 郵便番号
             # xxx = row[3] # 都道府県名（半角カタカナ）
-            city_kana_name = row[4] # 市区町村名（半角カタカナ）
+            city_kana_name = mojimoji.han_to_zen(row[4]) # 市区町村名（半角カタカナ）
             town_kana_name = row[5] if not same_zip_code else f"{town_kana_name}{row[5]}" # 町域名（半角カタカナ）
             town_kana_name = mojimoji.han_to_zen(town_kana_name)
             prefecture_name = row[6] # 都道府県名
@@ -181,8 +185,101 @@ def download():
             city_rome_name = ""
             town_rome_name = ""
 
-        dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{town_short_name},{town_ext_name},{mojimoji.han_to_zen(city_kana_name)},{town_short_kana_name},{town_ext_kana_name},{city_rome_name},{town_rome_name},{town_duplicate_flag},{building_flag}\n")
+        kana_dic[f"{prefecture_name},{city_name},,"] = { "city_name": city_kana_name, "town_name": "" }
+        kana_dic[f"{prefecture_name},{city_name},{town_short_name},"] = { "city_name": city_kana_name, "town_name": town_short_kana_name }
+        dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{city_kana_name},{city_rome_name},{town_short_name},{town_short_kana_name},{town_rome_name},{town_ext_name},{town_ext_kana_name},{town_duplicate_flag},{building_flag}\n")
 
+
+    # 郵便番号データ（大口事業所）のダウンロード
+    response = requests.get("https://www.post.japanpost.jp/zipcode/dl/jigyosyo/zip/jigyosyo.zip")
+    if response.status_code != 200:
+        e = Exception(f"HTTP status : {response.status_code}")
+        raise e
+    
+    # ダウンロードデータのファイル出力
+    with open("jigyosyo.zip", "wb") as file:
+        file.write(response.content)
+
+    # zipファイルの解凍
+    with zipfile.ZipFile("./jigyosyo.zip") as zip:
+        zip.extractall("./")
+
+    # 文字コード変換(shift-jis -> utf-8)
+    src_file_path = "./JIGYOSYO.CSV"
+    dest_file_path = "./JIGYOSYO_UTF8.CSV"
+
+    with codecs.open(src_file_path, "r", encoding="cp932") as src, codecs.open(dest_file_path, "w", encoding="utf-8") as dest:
+        reader = csv.reader(src)
+        area_code = ""
+        office_name = ""
+        office_kana_name = ""
+        zip_code = ""
+        prefecture_name = ""
+        city_name = ""
+        city_kana_name = ""
+        city_rome_name = ""
+        town_name = ""
+        town_kana_name = ""
+        town_ext_name = ""
+        town_rome_name = ""
+        office_flag = 0
+        post_office_box_flag = 0
+        zip_code_branch_no = {}
+        rows = []
+
+
+        for row in reader:
+
+            area_code = row[0] # 全国地方公共団体コード
+            office_kana_name = mojimoji.han_to_zen(row[1]) # 大口事業所名（カナ）
+            office_name = row[2] # 大口事業所名（漢字）
+            prefecture_name = row[3] # 都道府県名
+            city_name = row[4] # 市区町村名
+            town_name = row[5] # 町域名
+            town_ext_name = row[6] # 小字名、丁目、番地等
+            zip_code = re.sub(r'([0-9]{3})([0-9]{4})', r'\1-\2', row[7]) # 郵便番号
+            # xxx = row[8] # 旧郵便番号5桁
+            # xxx = row[9] # 取扱局
+            office_flag = 1 if row[10] == "0" else 0 # 「0」大口事業所、「1」私書箱
+            post_office_box_flag = 1 if row[10] == "1" else 0 # 「0」大口事業所、「1」私書箱
+            # xxx = row[11] # 複数番号の有無
+            # xxx = row[12] # 修正コード
+
+            #city_kana_name = row[4] # 市区町村名（半角カタカナ）
+            #town_kana_name = row[5] if not same_zip_code else f"{town_kana_name}{row[5]}" # 町域名（半角カタカナ）
+
+            if zip_code in zip_code_branch_no:
+                zip_code_branch_no[zip_code] += 1
+            else:
+                zip_code_branch_no[zip_code] = 1
+
+            key = f"{prefecture_name},{city_name},{town_name},"
+            if key in rome_dic:
+                city_rome_name = rome_dic[key]["city_name"]
+                town_rome_name = rome_dic[key]["town_name"]
+            else:
+                key = f"{prefecture_name},{city_name},,"
+                if key in rome_dic:
+                    city_rome_name = rome_dic[key]["city_name"]
+                    town_rome_name = rome_dic[key]["town_name"]
+                else:
+                    city_rome_name = ""
+                    town_rome_name = ""
+
+            key = f"{prefecture_name},{city_name},{town_name},"
+            if key in kana_dic:
+                city_kana_name = kana_dic[key]["city_name"]
+                town_kana_name = kana_dic[key]["town_name"]
+            else:
+                key = f"{prefecture_name},{city_name},,"
+                if key in kana_dic:
+                    city_kana_name = kana_dic[key]["city_name"]
+                    town_kana_name = kana_dic[key]["town_name"]
+                else:
+                    city_kana_name = ""
+                    town_kana_name = ""
+
+            dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{city_kana_name},{city_rome_name},{town_name},{town_kana_name},{town_rome_name},{town_ext_name},{office_name},{office_kana_name},{office_flag},{post_office_box_flag}\n")
 
 if __name__ == "__main__":
     download()
