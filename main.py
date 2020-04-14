@@ -236,7 +236,10 @@ def download():
             prefecture_name = row[3] # 都道府県名
             city_name = row[4] # 市区町村名
             town_name = row[5] # 町域名
+            town_kana_name = ""
+            town_rome_name = ""
             town_ext_name = row[6] # 小字名、丁目、番地等
+            town_ext_kana_name = ""
             zip_code = re.sub(r'([0-9]{3})([0-9]{4})', r'\1-\2', row[7]) # 郵便番号
             # xxx = row[8] # 旧郵便番号5桁
             # xxx = row[9] # 取扱局
@@ -254,15 +257,33 @@ def download():
                 zip_code_branch_no[zip_code] = 1
 
             key = f"{prefecture_name},{city_name},{town_name},"
+            if key == "東京都,千代田区,猿楽町,":
+                town_name = "神田猿楽町"
+            elif key == "東京都,千代田区,三崎町,":
+                town_name = "神田三崎町"
+            
+            key = f"{prefecture_name},{city_name},{town_name},"
             if key in rome_dic:
                 city_rome_name = rome_dic[key]["city_name"]
                 town_rome_name = rome_dic[key]["town_name"]
             else:
-                town_name_exclude_aza = re.sub(r"(大)?字", "", town_name)
+                town_name_exclude_aza = ""
+                if "ケ" in town_name:
+                    town_name_exclude_aza = town_name.replace("ケ", "ヶ")
+                elif "ヶ" in town_name:
+                    town_name_exclude_aza = town_name.replace("ヶ", "ケ")
+                elif "字" in town_name:
+                    town_name_exclude_aza = re.sub(r"(大)?字", "", town_name)
+                elif "通" in town_name:
+                    town_name_exclude_aza = re.sub(r"(.*?)[０１２３４５６７８９].*", r"\1", town_ext_name)
+
                 key = f"{prefecture_name},{city_name},{town_name_exclude_aza},"
-                if town_name != town_name_exclude_aza and key in rome_dic:
+                if town_name_exclude_aza and key in rome_dic:
                     city_rome_name = rome_dic[key]["city_name"]
-                    town_rome_name = rome_dic[key]["town_name"]
+                    if "通" in town_name:
+                        town_rome_name = ""
+                    else:
+                        town_rome_name = rome_dic[key]["town_name"]
                 else:
                     key = f"{prefecture_name},{city_name},,"
                     if key in rome_dic:
@@ -277,11 +298,23 @@ def download():
                 city_kana_name = kana_dic[key]["city_name"]
                 town_kana_name = kana_dic[key]["town_name"]
             else:
-                town_name_exclude_aza = re.sub(r"(大)?字", "", town_name)
+                town_name_exclude_aza = ""
+                if "ケ" in town_name:
+                    town_name_exclude_aza = town_name.replace("ケ", "ヶ")
+                elif "ヶ" in town_name:
+                    town_name_exclude_aza = town_name.replace("ヶ", "ケ")
+                elif "字" in town_name:
+                    town_name_exclude_aza = re.sub(r"(大)?字", "", town_name)
+                elif "通" in town_name:
+                    town_name_exclude_aza = re.sub(r"(.*?)[０１２３４５６７８９].*", r"\1", town_ext_name)
+
                 key = f"{prefecture_name},{city_name},{town_name_exclude_aza},"
-                if town_name != town_name_exclude_aza and key in kana_dic:
+                if town_name_exclude_aza and key in kana_dic:
                     city_kana_name = kana_dic[key]["city_name"]
-                    town_kana_name = kana_dic[key]["town_name"]
+                    if "通" in town_name:
+                        town_ext_kana_name = kana_dic[key]["town_name"]
+                    else:
+                        town_kana_name = kana_dic[key]["town_name"]
                 else:
                     key = f"{prefecture_name},{city_name},,"
                     if key in kana_dic:
@@ -291,7 +324,7 @@ def download():
                         city_kana_name = ""
                         town_kana_name = ""
 
-            dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{city_kana_name},{city_rome_name},{town_name},{town_kana_name},{town_rome_name},{town_ext_name},{office_name},{office_kana_name},{office_flag},{post_office_box_flag}\n")
+            dest.write(f"{zip_code},{zip_code_branch_no[zip_code]},{area_code},{prefecture_name},{city_name},{city_kana_name},{city_rome_name},{town_name},{town_kana_name},{town_rome_name},{town_ext_name},{town_ext_kana_name},{office_name},{office_kana_name},{office_flag},{post_office_box_flag}\n")
 
 if __name__ == "__main__":
     download()
